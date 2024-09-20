@@ -44,6 +44,24 @@ workflow  SAMPLESHEET_TO_CHANNEL{
     }.combine(ch_with_patient_sample, by: 0) // for each entry add numLanes
     .map { patient_sample, num_lanes, ch_items ->
         (meta, fastq_1, fastq_2, spring_1, spring_2, table, cram, crai, bam, bai, vcf, variantcaller) = ch_items
+
+        // input validation to check that sample IDs are not shared between patients over multiple lanes
+        if (meta.lane) {
+            meta = meta + [id: "${meta.sample}-${meta.lane}".toString()]
+            if (meta.id.count() != meta.id.unique().count()) {
+                error("Samplesheet contains sample IDs shared between patients across multiple lanes. Please check your samplesheet.")
+            }
+            // check that sample IDs ARE shared across lanes within a single patient
+            if (patient_sample.count() / patient_sample.unique().count() != num_lanes.toInteger()) {
+                error("For samplesheets with multiple lanes, Sample IDs must be the same for each unique patient across each lane. Please check your samplesheet.")
+            }
+        } else {
+            // Not multilane samples, but sample IDs should still be unique
+            if (meta.sample.count() != meta.sample.unique().count()) {
+                error("Samplesheet contains sample IDs shared between patients. Please check your samplesheet.")
+            }
+        }
+
         if (meta.lane && fastq_2) {
             meta = meta + [id: "${meta.sample}-${meta.lane}".toString(), data_type: "fastq_gz", num_lanes: num_lanes.toInteger(), size: 1]
 
