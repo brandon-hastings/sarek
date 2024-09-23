@@ -31,4 +31,133 @@ nextflow_workflow {
 
     }
 
+    // test for failure due to input validation of sample IDs shared across patients with multiple lanes
+    test("Should fail") {
+
+        when {
+            params {
+                // define parameters here. Example:
+                skip_tools = 'baserecalibrator'
+
+            }
+            workflow {
+                """
+                // define inputs of the workflow here. Example:
+                input[0] = Channel.of([['patient':'test1', 'sample':'test1',
+                                        'sex':'XX', 'status':0, 'lane':'test_L1'],
+                                        file(params.test_data['sarscov2']['illumina']['test_1_fastq_gz'], checkIfExists: true),
+                                        file(params.test_data['sarscov2']['illumina']['test_2_fastq_gz'], checkIfExists: true),
+                                        [], [], [], [], [], [], []],
+                                        [['patient':'test1', 'sample':'test1',
+                                        'sex':'XX', 'status':0, 'lane':'test_L2'],
+                                        file(params.test_data['sarscov2']['illumina']['test_1_fastq_gz'], checkIfExists: true),
+                                        file(params.test_data['sarscov2']['illumina']['test_2_fastq_gz'], checkIfExists: true),
+                                        [], [], [], [], [], [], []],
+                                        [['patient':'test2', 'sample':'test1',
+                                        'sex':'XX', 'status':0, 'lane':'test_L1'],
+                                        file(params.test_data['sarscov2']['illumina']['test_1_fastq_gz'], checkIfExists: true),
+                                        file(params.test_data['sarscov2']['illumina']['test_2_fastq_gz'], checkIfExists: true),
+                                        [], [], [], [], [], [], []],
+                                        [['patient':'test2', 'sample':'test1',
+                                        'sex':'XX', 'status':0, 'lane':'test_L2'],
+                                        file(params.test_data['sarscov2']['illumina']['test_1_fastq_gz'], checkIfExists: true),
+                                        file(params.test_data['sarscov2']['illumina']['test_2_fastq_gz'], checkIfExists: true),
+                                        [], [], [], [], [], [], []])
+                """
+            }
+        }
+
+        then {
+            assert workflow.failed
+            // assert snapshot(workflow.out).match()
+        }
+
+    }
+
+    // test for failure due to input validation to check that sample IDs of the same patient in different lanes are shared
+    test("Should fail") {
+
+        when {
+            params {
+                // define parameters here. Example:
+                skip_tools = 'baserecalibrator'
+
+            }
+            workflow {
+                """
+                // define inputs of the workflow here. Example:
+                input[0] = Channel.of([['patient':'test1', 'sample':'patient1_test0',
+                                        'sex':'XX', 'status':0, 'lane':'test_L1'],
+                                        file(params.test_data['sarscov2']['illumina']['test_1_fastq_gz'], checkIfExists: true),
+                                        file(params.test_data['sarscov2']['illumina']['test_2_fastq_gz'], checkIfExists: true),
+                                        [], [], [], [], [], [], []],
+                                        [['patient':'test1', 'sample':'patient1_test1',
+                                        'sex':'XX', 'status':0, 'lane':'test_L2'],
+                                        file(params.test_data['sarscov2']['illumina']['test_1_fastq_gz'], checkIfExists: true),
+                                        file(params.test_data['sarscov2']['illumina']['test_2_fastq_gz'], checkIfExists: true),
+                                        [], [], [], [], [], [], []],
+                                        [['patient':'test2', 'sample':'patient2_test1',
+                                        'sex':'XX', 'status':0, 'lane':'test_L1'],
+                                        file(params.test_data['sarscov2']['illumina']['test_1_fastq_gz'], checkIfExists: true),
+                                        file(params.test_data['sarscov2']['illumina']['test_2_fastq_gz'], checkIfExists: true),
+                                        [], [], [], [], [], [], []],
+                                        [['patient':'test2', 'sample':'patient2_test1',
+                                        'sex':'XX', 'status':0, 'lane':'test_L2'],
+                                        file(params.test_data['sarscov2']['illumina']['test_1_fastq_gz'], checkIfExists: true),
+                                        file(params.test_data['sarscov2']['illumina']['test_2_fastq_gz'], checkIfExists: true),
+                                        [], [], [], [], [], [], []])
+                """
+            }
+        }
+
+        then {
+            assert workflow.failed
+            // assert snapshot(workflow.out).match()
+        }
+
+    }
+
+        // test for failure due to input validation to check that sample IDs of the same patient in different lanes are shared
+    test("Should fail") {
+
+        when {
+            params {
+                // define parameters here. Example:
+                skip_tools = 'baserecalibrator'
+
+            }
+            workflow {
+                """
+                // define inputs of the workflow here. Example:
+                input[0] = Channel.of([['patient':'test1', 'sample':'testN1',
+                                        'sex':'XX', 'status':0],
+                                        file(params.test_data['sarscov2']['illumina']['test_1_fastq_gz'], checkIfExists: true),
+                                        file(params.test_data['sarscov2']['illumina']['test_2_fastq_gz'], checkIfExists: true),
+                                        [], [], [], [], [], [], []],
+                                        [['patient':'test1', 'sample':'testT1',
+                                        'sex':'XX', 'status':1],
+                                        file(params.test_data['sarscov2']['illumina']['test_1_fastq_gz'], checkIfExists: true),
+                                        file(params.test_data['sarscov2']['illumina']['test_2_fastq_gz'], checkIfExists: true),
+                                        [], [], [], [], [], [], []],
+                                        [['patient':'test2', 'sample':'testN1',
+                                        'sex':'XX', 'status':0],
+                                        file(params.test_data['sarscov2']['illumina']['test_1_fastq_gz'], checkIfExists: true),
+                                        file(params.test_data['sarscov2']['illumina']['test_2_fastq_gz'], checkIfExists: true),
+                                        [], [], [], [], [], [], []],
+                                        [['patient':'test2', 'sample':'testT1',
+                                        'sex':'XX', 'status':1],
+                                        file(params.test_data['sarscov2']['illumina']['test_1_fastq_gz'], checkIfExists: true),
+                                        file(params.test_data['sarscov2']['illumina']['test_2_fastq_gz'], checkIfExists: true),
+                                        [], [], [], [], [], [], []])
+                """
+            }
+        }
+
+        then {
+            assert workflow.failed
+            // assert snapshot(workflow.out).match()
+        }
+
+    }
+
 }
